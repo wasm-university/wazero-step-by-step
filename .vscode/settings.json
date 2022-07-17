@@ -1,8 +1,8 @@
 {
   "workbench.iconTheme": "material-icon-theme",
-  "workbench.colorTheme": "Cobalt2",
-  "terminal.integrated.fontSize": 18,
-  "editor.fontSize": 18,
+  "workbench.colorTheme": "Winter is Coming (Light - No Italics)",
+  "terminal.integrated.fontSize": 16,
+  "editor.fontSize": 16,
   "go.toolsEnvVars": {
     "GOOS": "js",
     "GOARCH": "wasm",
