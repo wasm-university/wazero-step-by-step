@@ -1,5 +1,4 @@
-# 🖐 a wasm module cannot print something
+# a function that returns a string
 
-- Create a host function that prints a string
 
 
