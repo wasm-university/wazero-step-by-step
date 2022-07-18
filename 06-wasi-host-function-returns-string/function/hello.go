@@ -40,8 +40,6 @@ func getStringFromHost() string {
 }
 
 
-
-
 //export host_log_string
 func host_log_string(ptr uint32, size uint32)
 
