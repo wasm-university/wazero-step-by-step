@@ -61,6 +61,25 @@ func main() {
 
 	fmt.Println("result:", result[0])
 
+  // Get a string from wasm
+  helloWorldwasmModuleFunction := mod.ExportedFunction("helloWorld")
+
+  ptrSize, errCallFunction := helloWorldwasmModuleFunction.Call(ctx)
+	if errCallFunction != nil {
+		log.Panicln("🔴 Error while calling the function ", errCallFunction)
+	}
+	// Note: This pointer is still owned by TinyGo, so don't try to free it!
+	helloWorldPtr := uint32(ptrSize[0] >> 32)
+	helloWorldSize := uint32(ptrSize[0])
+
+  // The pointer is a linear memory offset, which is where we write the name.
+	if bytes, ok := mod.Memory().Read(ctx, helloWorldPtr, helloWorldSize); !ok {
+		log.Panicf("🟥 Memory.Read(%d, %d) out of range of memory size %d",
+    helloWorldPtr, helloWorldSize, mod.Memory().Size(ctx))
+	} else {
+		fmt.Println("😃 the string message is:", string(bytes))
+	}
+
 }
 
 func logString(ctx context.Context, module api.Module, offset, byteCount uint32) {

@@ -29,6 +29,17 @@ func add(x uint32, y uint32) uint32 {
   return res;
 }
 
+// 🖐️ returns a pointer/size pair packed into a uint64.
+// Note: This uses a uint64 instead of two result values for compatibility with
+// WebAssembly 1.0.
+// https://stackoverflow.com/questions/5801008/go-and-operators
+// https://stackoverflow.com/questions/41790574/bitmask-multiple-values-in-int64
+
+//export helloWorld
+func helloWorld() (ptrAndSize uint64) {
+  ptr, size := stringToPtr("👋 hello world, I'm very happy to meet you, I love what you are doing my friend")
+	return (uint64(ptr) << uint64(32)) | uint64(size)
+}
 
 // stringToPtr returns a pointer and size pair for the given string in a way
 // compatible with WebAssembly numeric types.
