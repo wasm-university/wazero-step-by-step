@@ -77,6 +77,7 @@ func main() {
 		log.Panicf("🟥 Memory.Read(%d, %d) out of range of memory size %d",
     helloWorldPtr, helloWorldSize, mod.Memory().Size(ctx))
 	} else {
+    fmt.Println(bytes)
 		fmt.Println("😃 the string message is:", string(bytes))
 	}
 

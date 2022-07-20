@@ -36,7 +36,7 @@ func add(x uint32, y uint32) uint32 {
 // https://stackoverflow.com/questions/41790574/bitmask-multiple-values-in-int64
 
 //export helloWorld
-func helloWorld() (ptrAndSize uint64) {
+func helloWorld() uint64 {
   ptr, size := stringToPtr("👋 hello world, I'm very happy to meet you, I love what you are doing my friend")
 	return (uint64(ptr) << uint64(32)) | uint64(size)
 }
