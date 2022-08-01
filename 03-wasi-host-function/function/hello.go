@@ -1,38 +1,39 @@
 package main
 
 import (
-  "unsafe"
-  "strconv"
+	"unsafe"
 )
 
 // main is required for TinyGo to compile to Wasm.
 func main() {}
 
-//export host_log_string
-func host_log_string(ptr uint32, size uint32)
+//export hostLogString
+//go:linkname hostLogString
+func hostLogString(offset uint32, byteCount uint32)
 
-//export host_log_uint32
-func host_log_uint32(value uint32)
-
+//export hostLogUint32
+//go:linkname hostLogUint32
+func hostLogUint32(value uint32)
 
 //export add
 func add(x uint32, y uint32) uint32 {
-  // 🖐 a wasm module cannot print something
-  //fmt.Println(x,y)
-  res := x + y
+	// 🖐 a wasm module cannot print something
+	//fmt.Println(x,y)
+	res := x + y
 
-  host_log_uint32(res)
+	hostLogUint32(res)
 
-	ptr, size := stringToPtr("from wasm: " + strconv.FormatUint(uint64(res), 10))
-	host_log_string(ptr, size)
+	//offset, byteCount := strToPtr("from wasm: " + strconv.FormatUint(uint64(res), 10))
+	offset, byteCount := strToPtr("👋 Hello from wasm")
 
-  return res;
+	hostLogString(offset, byteCount)
+
+	return res
 }
 
-
-// stringToPtr returns a pointer and size pair for the given string in a way
+// strToPtr returns a pointer and size pair for the given string in a way
 // compatible with WebAssembly numeric types.
-func stringToPtr(s string) (uint32, uint32) {
+func strToPtr(s string) (uint32, uint32) {
 	buf := []byte(s)
 	ptr := &buf[0]
 	unsafePtr := uintptr(unsafe.Pointer(ptr))

@@ -1,11 +1,15 @@
 package main
 
+import (
+	_ "unsafe"
+)
+
 // main is required for TinyGo to compile to Wasm.
 func main() {}
 
-
-//export host_log_uint32
-func host_log_uint32(value uint32)
+//export hostLogUint32
+//go:linkname hostLogUint32
+func hostLogUint32(value uint32)
 
 // This exports an add function.
 // It takes in two uint32 values
@@ -15,11 +19,11 @@ func host_log_uint32(value uint32)
 
 //export add
 func add(x uint32, y uint32) uint32 {
-  // 🖐 a wasm module cannot print something
-  //fmt.Println(x,y)
-  res := x + y
+	// 🖐 a wasm module cannot print something
+	//fmt.Println(x,y)
+	res := x + y
 
-  host_log_uint32(res)
+	hostLogUint32(res)
 
-  return res;
+	return res
 }

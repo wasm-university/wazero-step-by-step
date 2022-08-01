@@ -11,8 +11,6 @@ import (
 	"github.com/tetratelabs/wazero/wasi_snapshot_preview1"
 )
 
-
-
 func main() {
 	// Choose the context to use for function calls.
 	ctx := context.Background()
@@ -21,22 +19,19 @@ func main() {
 	wasmRuntime := wazero.NewRuntimeWithConfig(wazero.NewRuntimeConfig().WithWasmCore2())
 	defer wasmRuntime.Close(ctx) // This closes everything this Runtime created.
 
-
 	_, errEnv := wasmRuntime.NewModuleBuilder("env").
-    ExportFunction("host_log_uint32", func(value uint32) {
-      fmt.Println("🤖:", value)
-    }).
-		ExportFunction("host_log_string", logString).
+		ExportFunction("hostLogUint32", logUint32).
+		ExportFunction("hostLogString", logString).
 		Instantiate(ctx, wasmRuntime)
 
-    if errEnv != nil {
-      log.Panicln("🔴 Error with env module and host function(s):", errEnv)
-    }
+	if errEnv != nil {
+		log.Panicln("🔴 Error with env module and host function(s):", errEnv)
+	}
 
-    _, errInstantiate := wasi_snapshot_preview1.Instantiate(ctx, wasmRuntime);
-    if errInstantiate != nil {
-      log.Panicln("🔴 Error with Instantiate:", errInstantiate)
-    }
+	_, errInstantiate := wasi_snapshot_preview1.Instantiate(ctx, wasmRuntime)
+	if errInstantiate != nil {
+		log.Panicln("🔴 Error with Instantiate:", errInstantiate)
+	}
 
 	// Load then Instantiate a WebAssembly module
 	helloWasm, errLoadWasmModule := os.ReadFile("./function/hello.wasm")
@@ -61,6 +56,10 @@ func main() {
 
 	fmt.Println("result:", result[0])
 
+}
+
+func logUint32(value uint32) {
+	fmt.Println("🤖:", value)
 }
 
 func logString(ctx context.Context, module api.Module, offset, byteCount uint32) {

@@ -11,8 +11,6 @@ import (
 	"github.com/tetratelabs/wazero/wasi_snapshot_preview1"
 )
 
-
-
 func main() {
 	// Choose the context to use for function calls.
 	ctx := context.Background()
@@ -23,22 +21,21 @@ func main() {
 
 	// 👋 Add a Host Function
 	// Instantiate a Go-defined module named "env"
-  // that exports a function (host_log_uint32) from the host to the wasm module
+	// that exports a function (host_log_uint32) from the host to the wasm module
 	_, errEnv := wasmRuntime.NewModuleBuilder("env").
-    ExportFunction("host_log_uint32", func(value uint32) {
-      fmt.Println("🤖:", value)
-    }).
+		ExportFunction("hostLogUint32", func(value uint32) {
+			fmt.Println("🤖:", value)
+		}).
 		Instantiate(ctx, wasmRuntime)
 
-  if errEnv != nil {
+	if errEnv != nil {
 		log.Panicln("🔴 Error with env module and host function(s):", errEnv)
 	}
 
-	_, errInstantiate := wasi_snapshot_preview1.Instantiate(ctx, wasmRuntime);
-  if errInstantiate != nil {
+	_, errInstantiate := wasi_snapshot_preview1.Instantiate(ctx, wasmRuntime)
+	if errInstantiate != nil {
 		log.Panicln("🔴 Error with Instantiate:", errInstantiate)
 	}
-
 
 	// Load then Instantiate a WebAssembly module
 	helloWasm, errLoadWasmModule := os.ReadFile("./function/hello.wasm")
@@ -53,7 +50,6 @@ func main() {
 
 	// Get references to WebAssembly function: "add"
 	addWasmModuleFunction := mod.ExportedFunction("add")
-
 
 	// Now, we can call "add", which reads the string we wrote to memory!
 	// result []uint64
