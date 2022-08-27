@@ -11,32 +11,29 @@ import (
 	"github.com/tetratelabs/wazero/wasi_snapshot_preview1"
 )
 
-
-
 func main() {
 	// Choose the context to use for function calls.
 	ctx := context.Background()
 
 	// Create a new WebAssembly Runtime.
-	wasmRuntime := wazero.NewRuntimeWithConfig(wazero.NewRuntimeConfig().WithWasmCore2())
+	wasmRuntime := wazero.NewRuntimeWithConfig(ctx, wazero.NewRuntimeConfig().WithWasmCore2())
 	defer wasmRuntime.Close(ctx) // This closes everything this Runtime created.
 
-
 	_, errEnv := wasmRuntime.NewModuleBuilder("env").
-    ExportFunction("host_log_uint32", func(value uint32) {
-      fmt.Println("🤖:", value)
-    }).
+		ExportFunction("host_log_uint32", func(value uint32) {
+			fmt.Println("🤖:", value)
+		}).
 		ExportFunction("host_log_string", logString).
 		Instantiate(ctx, wasmRuntime)
 
-    if errEnv != nil {
-      log.Panicln("🔴 Error with env module and host function(s):", errEnv)
-    }
+	if errEnv != nil {
+		log.Panicln("🔴 Error with env module and host function(s):", errEnv)
+	}
 
-    _, errInstantiate := wasi_snapshot_preview1.Instantiate(ctx, wasmRuntime);
-    if errInstantiate != nil {
-      log.Panicln("🔴 Error with Instantiate:", errInstantiate)
-    }
+	_, errInstantiate := wasi_snapshot_preview1.Instantiate(ctx, wasmRuntime)
+	if errInstantiate != nil {
+		log.Panicln("🔴 Error with Instantiate:", errInstantiate)
+	}
 
 	// Load then Instantiate a WebAssembly module
 	helloWasm, errLoadWasmModule := os.ReadFile("./function/hello.wasm")
@@ -61,10 +58,10 @@ func main() {
 
 	fmt.Println("result:", result[0])
 
-  // Get a string from wasm
-  helloWorldwasmModuleFunction := mod.ExportedFunction("helloWorld")
+	// Get a string from wasm
+	helloWorldwasmModuleFunction := mod.ExportedFunction("helloWorld")
 
-  ptrSize, errCallFunction := helloWorldwasmModuleFunction.Call(ctx)
+	ptrSize, errCallFunction := helloWorldwasmModuleFunction.Call(ctx)
 	if errCallFunction != nil {
 		log.Panicln("🔴 Error while calling the function ", errCallFunction)
 	}
@@ -72,12 +69,12 @@ func main() {
 	helloWorldPtr := uint32(ptrSize[0] >> 32)
 	helloWorldSize := uint32(ptrSize[0])
 
-  // The pointer is a linear memory offset, which is where we write the name.
+	// The pointer is a linear memory offset, which is where we write the name.
 	if bytes, ok := mod.Memory().Read(ctx, helloWorldPtr, helloWorldSize); !ok {
 		log.Panicf("🟥 Memory.Read(%d, %d) out of range of memory size %d",
-    helloWorldPtr, helloWorldSize, mod.Memory().Size(ctx))
+			helloWorldPtr, helloWorldSize, mod.Memory().Size(ctx))
 	} else {
-    fmt.Println(bytes)
+		fmt.Println(bytes)
 		fmt.Println("😃 the string message is:", string(bytes))
 	}
 

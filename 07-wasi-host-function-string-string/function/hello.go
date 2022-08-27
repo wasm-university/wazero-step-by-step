@@ -12,11 +12,10 @@ func main() {
 	ptr, size := stringToPtr("from the main method: " + getStringFromHost())
 	host_log_string(ptr, size)
 
-  msg := talk("hello, are you there ?")
+	msg := talk("hello, are you there ?")
 
-
-  ptr2, size2 := stringToPtr(msg)
-  host_log_string(ptr2, size2)
+	ptr2, size2 := stringToPtr(msg)
+	host_log_string(ptr2, size2)
 
 }
 
@@ -30,10 +29,11 @@ func allocateBuffer(size uint32) *byte {
 }
 
 //export host_talk
+//go:linkname host_talk
 func host_talk(ptr uint32, size uint32, retBufPtr **byte, retBufSize *int)
 
-
 //export host_get_string
+//go:linkname host_get_string
 func host_get_string(retBufPtr **byte, retBufSize *int)
 
 // Get the string from the hosts.
@@ -51,12 +51,12 @@ func getStringFromHost() string {
 
 func talk(message string) string {
 
-  ptr, size := stringToPtr(message)
+	ptr, size := stringToPtr(message)
 
-  var bufPtr *byte
+	var bufPtr *byte
 	var bufSize int
 
-  host_talk(ptr, size, &bufPtr, &bufSize)
+	host_talk(ptr, size, &bufPtr, &bufSize)
 
 	return *(*string)(unsafe.Pointer(&reflect.SliceHeader{
 		Data: uintptr(unsafe.Pointer(bufPtr)),
@@ -67,9 +67,11 @@ func talk(message string) string {
 }
 
 //export host_log_string
+//go:linkname host_log_string
 func host_log_string(ptr uint32, size uint32)
 
 //export host_log_uint32
+//go:linkname host_log_uint32
 func host_log_uint32(value uint32)
 
 //export add

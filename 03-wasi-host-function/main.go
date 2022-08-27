@@ -16,7 +16,7 @@ func main() {
 	ctx := context.Background()
 
 	// Create a new WebAssembly Runtime.
-	wasmRuntime := wazero.NewRuntimeWithConfig(wazero.NewRuntimeConfig().WithWasmCore2())
+	wasmRuntime := wazero.NewRuntimeWithConfig(ctx, wazero.NewRuntimeConfig().WithWasmCore2())
 	defer wasmRuntime.Close(ctx) // This closes everything this Runtime created.
 
 	_, errEnv := wasmRuntime.NewModuleBuilder("env").
