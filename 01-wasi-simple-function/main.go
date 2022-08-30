@@ -15,13 +15,10 @@ func main() {
 	ctx := context.Background()
 
 	// Create a new WebAssembly Runtime.
-
 	r := wazero.NewRuntime(ctx)
-	// Enable WebAssembly 2.0 support, which is required for TinyGo 0.24+.
-
 	defer r.Close(ctx) // This closes everything this Runtime created.
 
-	// TinyGo specific to use WASI)
+	// TinyGo specific to use WASI
 	_, err := wasi_snapshot_preview1.Instantiate(ctx, r)
 	if err != nil {
 		log.Panicln(err)

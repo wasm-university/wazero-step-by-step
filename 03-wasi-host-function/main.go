@@ -16,19 +16,19 @@ func main() {
 	ctx := context.Background()
 
 	// Create a new WebAssembly Runtime.
-	wasmRuntime := wazero.NewRuntime(ctx)
-	defer wasmRuntime.Close(ctx) // This closes everything this Runtime created.
+	r := wazero.NewRuntime(ctx)
+	defer r.Close(ctx) // This closes everything this Runtime created.
 
-	_, errEnv := wasmRuntime.NewHostModuleBuilder("env").
-		ExportFunction("hostLogUint32", logUint32).
-		ExportFunction("hostLogString", logString).
-		Instantiate(ctx, wasmRuntime)
+	_, errEnv := r.NewHostModuleBuilder("env").
+		NewFunctionBuilder().WithFunc(logUint32).Export("hostLogUint32").
+		NewFunctionBuilder().WithFunc(logString).Export("hostLogString").
+		Instantiate(ctx, r)
 
 	if errEnv != nil {
 		log.Panicln("🔴 Error with env module and host function(s):", errEnv)
 	}
 
-	_, errInstantiate := wasi_snapshot_preview1.Instantiate(ctx, wasmRuntime)
+	_, errInstantiate := wasi_snapshot_preview1.Instantiate(ctx, r)
 	if errInstantiate != nil {
 		log.Panicln("🔴 Error with Instantiate:", errInstantiate)
 	}
@@ -39,7 +39,7 @@ func main() {
 		log.Panicln("🔴 Error while loading the wasm module", errLoadWasmModule)
 	}
 
-	mod, errInstanceWasmModule := wasmRuntime.InstantiateModuleFromBinary(ctx, helloWasm)
+	mod, errInstanceWasmModule := r.InstantiateModuleFromBinary(ctx, helloWasm)
 	if errInstanceWasmModule != nil {
 		log.Panicln("🔴 Error while creating module instance ", errInstanceWasmModule)
 	}
