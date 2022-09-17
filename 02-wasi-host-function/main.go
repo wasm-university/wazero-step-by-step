@@ -7,8 +7,7 @@ import (
 	"os"
 
 	"github.com/tetratelabs/wazero"
-	//"github.com/tetratelabs/wazero/api"
-	"github.com/tetratelabs/wazero/wasi_snapshot_preview1"
+	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
 )
 
 func main() {
@@ -38,7 +37,10 @@ func main() {
 	}
 
 	// Load then Instantiate a WebAssembly module
-	helloWasm, errLoadWasmModule := os.ReadFile("./function/hello.wasm")
+	//wasmPath2 := "./functions/hello/hello.wasm"
+	wasmPath1 := "./functions/hey/target/wasm32-wasi/debug/hey.wasm"
+
+	helloWasm, errLoadWasmModule := os.ReadFile(wasmPath1)
 	if errLoadWasmModule != nil {
 		log.Panicln("🔴 Error while loading the wasm module", errLoadWasmModule)
 	}

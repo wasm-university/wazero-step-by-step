@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/tetratelabs/wazero"
-	"github.com/tetratelabs/wazero/wasi_snapshot_preview1"
+	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
 )
 
 func main() {
@@ -31,7 +31,10 @@ func main() {
 	}
 
 	// Load then Instantiate a WebAssembly module
-	helloWasm, err := os.ReadFile("./function/hello.wasm")
+	wasmPath1 := "./functions/hey/target/wasm32-wasi/debug/hey.wasm"
+	//wasmPath2 := "./functions/hello/hello.wasm"
+	helloWasm, err := os.ReadFile(wasmPath1)
+
 	if err != nil {
 		log.Panicln(err)
 	}
