@@ -8,7 +8,7 @@ import (
 
 	"github.com/tetratelabs/wazero"
 	"github.com/tetratelabs/wazero/api"
-	"github.com/tetratelabs/wazero/wasi_snapshot_preview1"
+	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
 )
 
 func main() {
@@ -16,10 +16,10 @@ func main() {
 	ctx := context.Background()
 
 	// Create a new WebAssembly Runtime.
-	wasmRuntime := wazero.NewRuntimeWithConfig(ctx, wazero.NewRuntimeConfig().WithWasmCore2())
+	wasmRuntime := wazero.NewRuntime(ctx)
 	defer wasmRuntime.Close(ctx) // This closes everything this Runtime created.
 
-	_, errEnv := wasmRuntime.NewModuleBuilder("env").
+	_, errEnv := wasmRuntime.NewHostModuleBuilder("env").
 		ExportFunction("host_log_uint32", func(value uint32) {
 			fmt.Println("🤖:", value)
 		}).

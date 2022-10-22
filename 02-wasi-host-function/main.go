@@ -15,13 +15,13 @@ func main() {
 	ctx := context.Background()
 
 	// Create a new WebAssembly Runtime.
-	wasmRuntime := wazero.NewRuntimeWithConfig(ctx, wazero.NewRuntimeConfig().WithWasmCore2())
+	wasmRuntime := wazero.NewRuntime(ctx)
 	defer wasmRuntime.Close(ctx) // This closes everything this Runtime created.
 
 	// 👋 Add a Host Function
 	// Instantiate a Go-defined module named "env"
 	// that exports a function (host_log_uint32) from the host to the wasm module
-	_, errEnv := wasmRuntime.NewModuleBuilder("env").
+	_, errEnv := wasmRuntime.NewHostModuleBuilder("env").
 		ExportFunction("hostLogUint32", func(value uint32) {
 			fmt.Println("🤖:", value)
 		}).
