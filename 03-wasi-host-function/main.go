@@ -22,7 +22,7 @@ func main() {
 	_, errEnv := r.NewHostModuleBuilder("env").
 		NewFunctionBuilder().WithFunc(logUint32).Export("hostLogUint32").
 		NewFunctionBuilder().WithFunc(logString).Export("hostLogString").
-		Instantiate(ctx, r)
+		Instantiate(ctx)
 
 	if errEnv != nil {
 		log.Panicln("🔴 Error with env module and host function(s):", errEnv)
@@ -39,7 +39,7 @@ func main() {
 		log.Panicln("🔴 Error while loading the wasm module", errLoadWasmModule)
 	}
 
-	mod, errInstanceWasmModule := r.InstantiateModuleFromBinary(ctx, helloWasm)
+	mod, errInstanceWasmModule := r.Instantiate(ctx, helloWasm)
 	if errInstanceWasmModule != nil {
 		log.Panicln("🔴 Error while creating module instance ", errInstanceWasmModule)
 	}
@@ -63,7 +63,7 @@ func logUint32(value uint32) {
 }
 
 func logString(ctx context.Context, module api.Module, offset, byteCount uint32) {
-	buf, ok := module.Memory().Read(ctx, offset, byteCount)
+	buf, ok := module.Memory().Read(offset, byteCount)
 	if !ok {
 		log.Panicf("🟥 Memory.Read(%d, %d) out of range", offset, byteCount)
 	}
