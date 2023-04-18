@@ -27,7 +27,7 @@ func main() {
 			fmt.Println("🤖:", value)
 		}).
 		Export("hostLogUint32").
-		Instantiate(ctx, r)
+		Instantiate(ctx)
 
 	if errEnv != nil {
 		log.Panicln("🔴 Error with env module and host function(s):", errEnv)
@@ -47,7 +47,7 @@ func main() {
 		log.Panicln("🔴 Error while loading the wasm module", errLoadWasmModule)
 	}
 
-	mod, errInstanceWasmModule := r.InstantiateModuleFromBinary(ctx, helloWasm)
+	mod, errInstanceWasmModule := r.Instantiate(ctx, helloWasm)
 	if errInstanceWasmModule != nil {
 		log.Panicln("🔴 Error while creating module instance ", errInstanceWasmModule)
 	}

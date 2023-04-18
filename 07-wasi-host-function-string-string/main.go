@@ -29,7 +29,7 @@ func main() {
 		NewFunctionBuilder().WithFunc(logString).Export("host_log_string").
 		NewFunctionBuilder().WithFunc(giveMeString).Export("host_get_string").
 		NewFunctionBuilder().WithFunc(talk).Export("host_talk").
-		Instantiate(ctx, r)
+		Instantiate(ctx)
 
 	if errEnv != nil {
 		log.Panicln("🔴 Error with env module and host function(s):", errEnv)
@@ -46,7 +46,7 @@ func main() {
 		log.Panicln("🔴 Error while loading the wasm module", errLoadWasmModule)
 	}
 
-	mod, errInstanceWasmModule := r.InstantiateModuleFromBinary(ctx, helloWasm)
+	mod, errInstanceWasmModule := r.Instantiate(ctx, helloWasm)
 	if errInstanceWasmModule != nil {
 		log.Panicln("🔴 Error while creating module instance ", errInstanceWasmModule)
 	}
@@ -77,9 +77,9 @@ func main() {
 	helloWorldSize := uint32(ptrSize[0])
 
 	// The pointer is a linear memory offset, which is where we write the name.
-	if bytes, ok := mod.Memory().Read(ctx, helloWorldPtr, helloWorldSize); !ok {
+	if bytes, ok := mod.Memory().Read(helloWorldPtr, helloWorldSize); !ok {
 		log.Panicf("🟥 Memory.Read(%d, %d) out of range of memory size %d",
-			helloWorldPtr, helloWorldSize, mod.Memory().Size(ctx))
+			helloWorldPtr, helloWorldSize, mod.Memory().Size())
 	} else {
 		fmt.Println("😃 the string message is:", string(bytes))
 	}
@@ -111,9 +111,9 @@ func main() {
 	defer free.Call(ctx, namePtr)
 
 	// The pointer is a linear memory offset, which is where we write the name.
-	if !mod.Memory().Write(ctx, uint32(namePtr), []byte(name)) {
+	if !mod.Memory().Write(uint32(namePtr), []byte(name)) {
 		log.Panicf("🟥 Memory.Write(%d, %d) out of range of memory size %d",
-			namePtr, nameSize, mod.Memory().Size(ctx))
+			namePtr, nameSize, mod.Memory().Size())
 	}
 
 	// Finally, we get the greeting message "greet" printed. This shows how to
@@ -126,9 +126,9 @@ func main() {
 	sayHelloPtr := uint32(sayHelloPtrSize[0] >> 32)
 	sayHelloSize := uint32(sayHelloPtrSize[0])
 	// The pointer is a linear memory offset, which is where we write the name.
-	if bytes, ok := mod.Memory().Read(ctx, sayHelloPtr, sayHelloSize); !ok {
+	if bytes, ok := mod.Memory().Read(sayHelloPtr, sayHelloSize); !ok {
 		log.Panicf("Memory.Read(%d, %d) out of range of memory size %d",
-			sayHelloPtr, sayHelloSize, mod.Memory().Size(ctx))
+			sayHelloPtr, sayHelloSize, mod.Memory().Size())
 	} else {
 		fmt.Println("👋 saying hello :", string(bytes))
 	}
@@ -136,7 +136,7 @@ func main() {
 }
 
 func logString(ctx context.Context, module api.Module, offset, byteCount uint32) {
-	buf, ok := module.Memory().Read(ctx, offset, byteCount)
+	buf, ok := module.Memory().Read(offset, byteCount)
 	if !ok {
 		log.Panicf("🟥 Memory.Read(%d, %d) out of range", offset, byteCount)
 	}
@@ -153,17 +153,17 @@ func giveMeString(ctx context.Context, module api.Module, retBufPtr uint32, retB
 	}
 
 	offset := uint32(results[0])
-	module.Memory().WriteUint32Le(ctx, retBufPtr, offset)
-	module.Memory().WriteUint32Le(ctx, retBufSize, uint32(lengthOfTheMessage))
+	module.Memory().WriteUint32Le(retBufPtr, offset)
+	module.Memory().WriteUint32Le(retBufSize, uint32(lengthOfTheMessage))
 
 	// add the message to the memory of the module
-	module.Memory().Write(ctx, offset, []byte(message))
+	module.Memory().Write(offset, []byte(message))
 
 }
 
 func talk(ctx context.Context, module api.Module, offset, byteCount, retBufPtr, retBufSize uint32) {
 	// getstring from the wasm module function (from memory)
-	buf, ok := module.Memory().Read(ctx, offset, byteCount)
+	buf, ok := module.Memory().Read(offset, byteCount)
 	if !ok {
 		log.Panicf("🟥 Memory.Read(%d, %d) out of range", offset, byteCount)
 	}
@@ -181,10 +181,10 @@ func talk(ctx context.Context, module api.Module, offset, byteCount, retBufPtr, 
 	}
 
 	retOffset := uint32(results[0])
-	module.Memory().WriteUint32Le(ctx, retBufPtr, retOffset)
-	module.Memory().WriteUint32Le(ctx, retBufSize, uint32(lengthOfTheMessage))
+	module.Memory().WriteUint32Le(retBufPtr, retOffset)
+	module.Memory().WriteUint32Le(retBufSize, uint32(lengthOfTheMessage))
 
 	// add the message to the memory of the module
-	module.Memory().Write(ctx, retOffset, []byte(stringMessageFromHost))
+	module.Memory().Write(retOffset, []byte(stringMessageFromHost))
 
 }

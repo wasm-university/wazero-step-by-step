@@ -26,7 +26,7 @@ func main() {
 		}).
 		Export("host_log_uint32").
 		NewFunctionBuilder().WithFunc(logString).Export("host_log_string").
-		Instantiate(ctx, r)
+		Instantiate(ctx)
 
 	if errEnv != nil {
 		log.Panicln("🔴 Error with env module and host function(s):", errEnv)
@@ -43,7 +43,7 @@ func main() {
 		log.Panicln("🔴 Error while loading the wasm module", errLoadWasmModule)
 	}
 
-	mod, errInstanceWasmModule := r.InstantiateModuleFromBinary(ctx, helloWasm)
+	mod, errInstanceWasmModule := r.Instantiate(ctx, helloWasm)
 	if errInstanceWasmModule != nil {
 		log.Panicln("🔴 Error while creating module instance ", errInstanceWasmModule)
 	}
@@ -72,9 +72,9 @@ func main() {
 	helloWorldSize := uint32(ptrSize[0])
 
 	// The pointer is a linear memory offset, which is where we write the name.
-	if bytes, ok := mod.Memory().Read(ctx, helloWorldPtr, helloWorldSize); !ok {
+	if bytes, ok := mod.Memory().Read(helloWorldPtr, helloWorldSize); !ok {
 		log.Panicf("🟥 Memory.Read(%d, %d) out of range of memory size %d",
-			helloWorldPtr, helloWorldSize, mod.Memory().Size(ctx))
+			helloWorldPtr, helloWorldSize, mod.Memory().Size())
 	} else {
 		fmt.Println(bytes)
 		fmt.Println("😃 the string message is:", string(bytes))
@@ -83,7 +83,7 @@ func main() {
 }
 
 func logString(ctx context.Context, module api.Module, offset, byteCount uint32) {
-	buf, ok := module.Memory().Read(ctx, offset, byteCount)
+	buf, ok := module.Memory().Read(offset, byteCount)
 	if !ok {
 		log.Panicf("🟥 Memory.Read(%d, %d) out of range", offset, byteCount)
 	}

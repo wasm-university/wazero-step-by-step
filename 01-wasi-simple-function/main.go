@@ -33,7 +33,7 @@ func main() {
 		log.Panicln(err)
 	}
 
-	mod, err := r.InstantiateModuleFromBinary(ctx, helloWasm)
+	mod, err := r.Instantiate(ctx, helloWasm)
 	if err != nil {
 		log.Panicln(err)
 	}
