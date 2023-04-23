@@ -1,4 +1,4 @@
 node_modules
 target
 tmp
-
+.DS_Store 
