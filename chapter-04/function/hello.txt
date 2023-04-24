@@ -2,6 +2,8 @@
 package main
 
 import (
+	"reflect"
+	"strings"
 	"unsafe"
 )
 
@@ -22,6 +24,52 @@ func Print(message string) {
 	hostPrintString(pos, size)
 }
 
+//export hostHTTPGet
+func hostHTTPGet(pos, size uint32, returnBufferPosition **byte, returnBufferLength *int) uint32
+
+
+// HTTPGet create an HTTP request
+func HTTPGet(url string, headers []string) string { //[]byte
+
+	jsonString := `{
+		"headers": [`+strings.Join(headers, ",")+`],
+		"url": "`+url+`"
+	}`
+
+	// get a pointer position and size in memory for the jsonString
+    jsonBuffer := []byte(jsonString)
+	jsonBufferPtr := &jsonBuffer[0]
+	unsafePtr := uintptr(unsafe.Pointer(jsonBufferPtr))
+
+	pos := uint32(unsafePtr)
+	size := uint32(len(jsonBuffer))
+
+	// use to get the position and the size of the returned value
+	var buffPtr *byte
+	var buffSize int
+	
+	// call the host function
+	hostHTTPGet(pos, size, &buffPtr, &buffSize)
+	
+	// read the value from the memory
+	result := getStringResult(buffPtr, buffSize)
+
+	return result
+}
+
+func getStringResult(buffPtr *byte, buffSize int) string {
+
+	result := *(*string)(unsafe.Pointer(&reflect.SliceHeader{
+		Data: uintptr(unsafe.Pointer(buffPtr)),
+		Len:  uintptr(buffSize),
+		Cap:  uintptr(buffSize),
+	}))
+
+	//Log("🟧 getStringResult: " + result)
+
+	return result
+}
+
 //export hello
 func hello(valuePosition *uint32, length int) uint64 {
 	
@@ -32,6 +80,15 @@ func hello(valuePosition *uint32, length int) uint64 {
 
 	Print("👋 from the module: " + message)
 
+	HTTPGet(
+		"https://jsonplaceholder.typicode.com/todos/3",
+		[]string{
+			`{"Content-Type": "application/json; charset=utf-8"}`,
+			`{"authentication-token":"ILove🐼"}`,	
+		},
+	)
+
+	//Print("🤗" + string(b))
 
 	// copy the value to memory
 	posSizePairValue := copyBufferToMemory([]byte(message))

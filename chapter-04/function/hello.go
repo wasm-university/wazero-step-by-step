@@ -2,17 +2,18 @@
 package main
 
 import (
+	"reflect"
 	"unsafe"
 )
 
-func main () {}
+func main() {}
 
 //export hostPrintString
 func hostPrintString(pos, sisze uint32) uint32
 
 // Print a string
 func Print(message string) {
-    buffer := []byte(message)
+	buffer := []byte(message)
 	bufferPtr := &buffer[0]
 	unsafePtr := uintptr(unsafe.Pointer(bufferPtr))
 
@@ -22,9 +23,36 @@ func Print(message string) {
 	hostPrintString(pos, size)
 }
 
+
+//export hostTalk
+func hostTalk(messagePosition, messageLength uint32, returnValuePosition **byte, returnValueLength *int) uint32
+
+
+func stringToPtr(s string) (uint32, uint32) {
+	buf := []byte(s)
+	ptr := &buf[0]
+	unsafePtr := uintptr(unsafe.Pointer(ptr))
+	return uint32(unsafePtr), uint32(len(buf))
+}
+
+func getStringResult(buffPtr *byte, buffSize int) string {
+
+	result := *(*string)(unsafe.Pointer(&reflect.SliceHeader{
+		Data: uintptr(unsafe.Pointer(buffPtr)),
+		Len:  uintptr(buffSize),
+		Cap:  uintptr(buffSize),
+	}))
+
+	//Log("🟧 getStringResult: " + result)
+
+	return result
+}
+
+
+
 //export hello
 func hello(valuePosition *uint32, length int) uint64 {
-	
+
 	// read the memory to get the parameter
 	valueBytes := readBufferFromMemory(valuePosition, length)
 
@@ -32,6 +60,15 @@ func hello(valuePosition *uint32, length int) uint64 {
 
 	Print("👋 from the module: " + message)
 
+	var buffPtr *byte
+	var buffSize int
+	posMessage, lengthMessage := stringToPtr("this is a message")
+	
+	hostTalk(posMessage, lengthMessage, &buffPtr, &buffSize)
+
+	valueFromHost := getStringResult(buffPtr, buffSize) 
+
+	Print("From host: " + valueFromHost)
 
 	// copy the value to memory
 	posSizePairValue := copyBufferToMemory([]byte(message))

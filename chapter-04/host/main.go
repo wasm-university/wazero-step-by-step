@@ -27,6 +27,48 @@ var PrintString = api.GoModuleFunc(func(ctx context.Context, module api.Module, 
 	//stack[0] = 0 // return 0
 })
 
+
+// Talk ...
+var Talk = api.GoModuleFunc(func(ctx context.Context, module api.Module, params []uint64) {
+
+	position := uint32(params[0]) // <-- this comes from the wasm function (variable name)
+	length := uint32(params[1])
+
+	buffer, ok := module.Memory().Read(position, length)
+	if !ok {
+		log.Panicln("😡 Houston, We've Got a Problem")
+	}
+	message := string(buffer)
+	fmt.Println("message from WASM:", message)
+
+
+	messageFromHost := "Hello" 
+
+	messageFromHostLength := len(messageFromHost)
+
+	// this is a wasm function
+	results, err := module.ExportedFunction("allocateBuffer").Call(ctx, uint64(messageFromHostLength))
+	if err != nil {
+		log.Panicln("😡 Houston, We've Got a Problem", err)
+	}
+
+	fmt.Println("[Host] variable value:", messageFromHost)
+
+	positionReturnBuffer := uint32(params[2])
+	lengthReturnBuffer := uint32(params[3])
+
+	allocatedPosition := uint32(results[0])
+	module.Memory().WriteUint32Le(positionReturnBuffer, allocatedPosition)
+	module.Memory().WriteUint32Le(lengthReturnBuffer, uint32(messageFromHostLength))
+
+	// add the message to the memory of the module
+	module.Memory().Write(allocatedPosition, []byte(messageFromHost))
+
+	params[0] = 0
+
+})
+
+
 func main() {
 	// Choose the context to use for function calls.
 	ctx := context.Background()
@@ -34,8 +76,7 @@ func main() {
 	// Create a new WebAssembly Runtime.
 	runtime := wazero.NewRuntime(ctx)
 
-	// This closes everything this Runtime created.
-	defer runtime.Close(ctx)
+
 
 	// START: Host functions
 	builder := runtime.NewHostModuleBuilder("env")
@@ -50,11 +91,27 @@ func main() {
 			[]api.ValueType{api.ValueTypeI32}).
 		Export("hostPrintString")
 
-	_, err := builder.Instantiate(ctx)
-	if err != nil {
-		log.Panicln("Error with env module and host function(s):", err)
-	}
+
+		builder.NewFunctionBuilder().
+		WithGoModuleFunction(Talk,
+			[]api.ValueType{
+				api.ValueTypeI32, // position (variable name)
+				api.ValueTypeI32, // length
+				api.ValueTypeI32, // position (returned value)
+				api.ValueTypeI32, // length
+			},
+			[]api.ValueType{api.ValueTypeI32}).
+		Export("hostTalk")
+
+		_, err := builder.Instantiate(ctx)
+		if err != nil {
+			log.Panicln("Error with env module and host function(s):", err)
+		}
+
 	// END: Host functions
+
+	// This closes everything this Runtime created.
+	defer runtime.Close(ctx)
 
 	// Instantiate WASI
 	wasi_snapshot_preview1.MustInstantiate(ctx, runtime)
@@ -121,4 +178,3 @@ func main() {
 		fmt.Println("Returned value :", string(bytes))
 	}
 }
-
