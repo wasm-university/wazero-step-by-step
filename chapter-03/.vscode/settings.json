@@ -1,0 +1,24 @@
+{
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.colorTheme": "Default Dark+ Experimental",
+  //"workbench.colorTheme": "Aura Soft Dark (Soft Text)",
+  "terminal.integrated.fontSize": 16,
+  "editor.fontSize": 17,
+  "editor.renderLineHighlight": "all",
+  "workbench.colorCustomizations": {
+    "[GitHub Light Monochrome Focused]": {
+      "editor.lineHighlightBackground": "#c6d5e4"
+    }
+  },
+  "go.useLanguageServer": true,
+  "go.toolsGopath": "/home/ubuntu/go/",
+  "go.gopath": "/home/ubuntu/go/",
+  "go.toolsEnvVars": {
+    "GOOS": "linux",
+    "GOARCH": "arm64",
+  },
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "keyboard.layout": "com.apple.keylayout.French",
+}

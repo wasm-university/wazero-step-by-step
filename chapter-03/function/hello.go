@@ -1,12 +1,25 @@
 // Package main: this is a wasm module
 package main
 
-import (
-	"fmt"
-	"unsafe"
-)
+import "unsafe"
 
 func main () {}
+
+//export hostPrintString
+func hostPrintString(pos, sisze uint32) uint32
+
+// Print a string
+func Print(message string) {
+    buffer := []byte(message)
+	bufferPtr := &buffer[0]
+	unsafePtr := uintptr(unsafe.Pointer(bufferPtr))
+
+	pos := uint32(unsafePtr)
+	size := uint32(len(buffer))
+
+	hostPrintString(pos, size)
+}
+
 
 //export hello
 func hello(valuePosition *uint32, length int) uint64 {
@@ -16,7 +29,7 @@ func hello(valuePosition *uint32, length int) uint64 {
 
 	message := "Hello " + string(valueBytes)
 
-	fmt.Println("🎃" + message)
+	Print("👋 from the module: " + message)
 
 	// copy the value to memory
 	posSizePairValue := copyBufferToMemory([]byte(message))
