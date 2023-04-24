@@ -31,7 +31,7 @@ var PrintString = api.GoModuleFunc(func(ctx context.Context, module api.Module, 
 // Talk ...
 var Talk = api.GoModuleFunc(func(ctx context.Context, module api.Module, params []uint64) {
 
-	position := uint32(params[0]) // <-- this comes from the wasm function (variable name)
+	position := uint32(params[0]) 
 	length := uint32(params[1])
 
 	buffer, ok := module.Memory().Read(position, length)
