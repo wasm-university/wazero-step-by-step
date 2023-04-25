@@ -42,7 +42,7 @@ var Talk = api.GoModuleFunc(func(ctx context.Context, module api.Module, params 
 	fmt.Println("message from WASM:", message)
 
 
-	messageFromHost := "Hello" 
+	messageFromHost := "Hello 😀" 
 
 	messageFromHostLength := len(messageFromHost)
 
@@ -51,8 +51,6 @@ var Talk = api.GoModuleFunc(func(ctx context.Context, module api.Module, params 
 	if err != nil {
 		log.Panicln("😡 Houston, We've Got a Problem", err)
 	}
-
-	fmt.Println("[Host] variable value:", messageFromHost)
 
 	positionReturnBuffer := uint32(params[2])
 	lengthReturnBuffer := uint32(params[3])
